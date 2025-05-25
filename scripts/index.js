@@ -1,23 +1,28 @@
-function addCard (cardName, cardImageLink, deleteCallback) {
-const cardTemplate = document.querySelector('#card-template').content;
-const cardUnit = cardTemplate.querySelector('.card').cloneNode(true);
-const placesList = document.querySelector('.places__list');
+const placesList = document.querySelector(".places__list");
 
-cardUnit.querySelector('.card__image').src = cardImageLink;
-cardUnit.querySelector('.card__image').alt = cardName;
-cardUnit.querySelector('.card__title').textContent = cardName;
+function createCard(cardName, cardImageLink, deleteCallback) {
+  const cardTemplate = document.querySelector("#card-template").content;
+  const cardUnit = cardTemplate.querySelector(".card").cloneNode(true);
+  const cardImage = cardUnit.querySelector(".card__image");
+  const cardTitle = cardUnit.querySelector(".card__title");
 
-cardUnit.querySelector('.card__delete-button').addEventListener('click', function () {
-  deleteCallback(cardUnit);
-});
+  cardImage.src = cardImageLink;
+  cardImage.alt = cardName;
+  cardTitle.textContent = cardName;
 
-placesList.append(cardUnit);
+  cardUnit
+    .querySelector(".card__delete-button")
+    .addEventListener("click", function () {
+      deleteCallback(cardUnit);
+    });
+
+  return cardUnit;
 }
 
 function deleteCard(cardItem) {
   cardItem.remove();
 }
 
-for (let i = 0; i < initialCards.length; i++) {
-addCard(initialCards[i].name, initialCards[i].link, deleteCard);
-}
+initialCards.forEach(function (item) {
+  placesList.append(createCard(item.name, item.link, deleteCard));
+});
