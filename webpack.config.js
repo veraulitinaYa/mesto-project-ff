@@ -29,6 +29,11 @@ module.exports = {
         // исключает папку node_modules, файлы в ней обрабатывать не нужно
         exclude: "/node_modules/",
       },
+        {
+    // регулярное выражение, которое ищет все файлы с такими расширениями
+    test: /\.(png|svg|jpg|gif|woff(2)?|eot|ttf|otf)$/,
+    type: 'asset/resource'
+  },
     ],
   },
   plugins: [
