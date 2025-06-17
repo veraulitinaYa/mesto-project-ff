@@ -6,9 +6,9 @@ const buttonEditPopup = document.querySelector('.profile__edit-button');
 const windowEditPopup = document.querySelector('.popup_type_edit');
 
 const buttonNewCard = document.querySelector('.profile__add-button');
-const popupNewCard = document.querySelector('.popup_type_new-card');
+const windowNewCard = document.querySelector('.popup_type_new-card');
 
-
+const windowImage = document.querySelector('.popup_type_image');
 
 
 buttonEditPopup.addEventListener ('click', function(){
@@ -16,10 +16,8 @@ buttonEditPopup.addEventListener ('click', function(){
 });
 
 buttonNewCard.addEventListener ('click', function(){
- popupNewCard.classList.add('popup_is-opened');
+ windowNewCard.classList.add('popup_is-opened');
 });
-
-
 
 const placesList = document.querySelector(".places__list");
 
@@ -37,6 +35,15 @@ function createCard(cardName, cardImageLink, deleteCallback) {
     .querySelector(".card__delete-button")
     .addEventListener("click", function () {
       deleteCallback(cardUnit);
+    });
+
+    cardUnit
+    .querySelector(".card__image")
+    .addEventListener("click", function () {
+
+      const img = windowImage.querySelector('.popup__image');
+      img.src = cardImageLink;
+      windowImage.classList.add('popup_is-opened');
     });
 
   return cardUnit;
