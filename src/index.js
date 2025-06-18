@@ -12,12 +12,42 @@ const windowImage = document.querySelector('.popup_type_image');
 
 
 buttonEditPopup.addEventListener ('click', function(){
- windowEditPopup.classList.add('popup_is-opened');
-});
+openPopup(windowEditPopup);
+closePopup(windowEditPopup);
+ } );
 
 buttonNewCard.addEventListener ('click', function(){
- windowNewCard.classList.add('popup_is-opened');
+openPopup(windowNewCard);
+closePopup(windowNewCard);
+ } );
+
+
+
+function openPopup(popup) {
+popup.classList.add('popup_is-opened');
+}
+
+function closePopup (popup) {
+const closeButton = popup.querySelector('.popup__close');
+closeButton.addEventListener('click', function(){
+popup.classList.remove('popup_is-opened');
 });
+document.addEventListener('keydown', function(evt){
+  if (evt.key==='Escape'){
+    popup.classList.remove('popup_is-opened');
+
+  }
+
+
+});
+
+popup.addEventListener('click', function(evt){
+  if ((evt.target ===popup)){
+    popup.classList.remove('popup_is-opened');
+  }
+});
+
+}
 
 const placesList = document.querySelector(".places__list");
 
@@ -43,7 +73,9 @@ function createCard(cardName, cardImageLink, deleteCallback) {
 
       const img = windowImage.querySelector('.popup__image');
       img.src = cardImageLink;
-      windowImage.classList.add('popup_is-opened');
+
+      openPopup(windowImage);
+      closePopup(windowImage);
     });
 
   return cardUnit;
