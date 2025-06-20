@@ -48,7 +48,15 @@ function handleFormProfileSubmit(evt) {
 formProfile.addEventListener('submit', handleFormProfileSubmit);
 
 //------------------------------------------------------------------------------------------------------------
+function openCardCallback (cardName, cardLink) {
+      const img = document.querySelector('.popup__image');
+      const name = document.querySelector('.popup__caption');
+      img.src = cardLink;
+      name.textContent = cardName;
 
+      openPopup(windowImage);
+      closePopup(windowImage);
+}
 
 
 
@@ -61,7 +69,7 @@ function handleCardFormSubmit(evt) {
   const link = cardImageLinkInput.value;
 
   // Создаем новую карточку и добавляем в начало контейнера
-  const newCard = createCard(name, link, deleteCard, likeCallback);
+  const newCard = createCard(name, link, deleteCard, likeCallback, openCardCallback);
 
 
  placesList.prepend(newCard);
@@ -135,7 +143,7 @@ heartButton.classList.toggle('card__like-button_is-active');
 }
 
 
-function createCard(cardName, cardImageLink, deleteCallback, likeCallback) {
+function createCard(cardName, cardImageLink, deleteCallback, likeCallback, openCard) {
   const cardTemplate = document.querySelector("#card-template").content;
   const cardUnit = cardTemplate.querySelector(".card").cloneNode(true);
   const cardImage = cardUnit.querySelector(".card__image");
@@ -155,12 +163,14 @@ function createCard(cardName, cardImageLink, deleteCallback, likeCallback) {
     .querySelector(".card__image")
     .addEventListener("click", function () {
 
-      const img = windowImage.querySelector('.popup__image');
-      img.src = cardImageLink;
+      openCard(cardName, cardImageLink);
 
-      openPopup(windowImage);
-      closePopup(windowImage);
+
+
     });
+
+
+
 
 const cardLikeButton = cardUnit.querySelector ('.card__like-button');
 
@@ -176,5 +186,5 @@ function deleteCard(cardItem) {
 }
 
 initialCards.forEach(function (item) {
-  placesList.append(createCard(item.name, item.link, deleteCard, likeCallback));
+  placesList.append(createCard(item.name, item.link, deleteCard, likeCallback, openCardCallback));
 });
