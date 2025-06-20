@@ -20,6 +20,7 @@ const cardImageLinkInput = document.querySelector('.popup__input_type_url');
 
 
 
+
 function handleFormProfileSubmit(evt) {
     evt.preventDefault();
 
@@ -60,7 +61,7 @@ function handleCardFormSubmit(evt) {
   const link = cardImageLinkInput.value;
 
   // Создаем новую карточку и добавляем в начало контейнера
-  const newCard = createCard(name, link, deleteCard);
+  const newCard = createCard(name, link, deleteCard, likeCallback);
 
 
  placesList.prepend(newCard);
@@ -119,15 +120,6 @@ popup.addEventListener('click', function(evt){
 });
 
 
-// button.addEventListener('click', function(){
-// popup.classList.remove('popup_is-opened');
-// });
-
-
-
-
-
-
 
 }
 
@@ -137,7 +129,13 @@ popup.addEventListener('click', function(evt){
 
 const placesList = document.querySelector(".places__list");
 
-function createCard(cardName, cardImageLink, deleteCallback) {
+function likeCallback (heartButton) {
+
+heartButton.classList.toggle('card__like-button_is-active');
+}
+
+
+function createCard(cardName, cardImageLink, deleteCallback, likeCallback) {
   const cardTemplate = document.querySelector("#card-template").content;
   const cardUnit = cardTemplate.querySelector(".card").cloneNode(true);
   const cardImage = cardUnit.querySelector(".card__image");
@@ -164,6 +162,12 @@ function createCard(cardName, cardImageLink, deleteCallback) {
       closePopup(windowImage);
     });
 
+const cardLikeButton = cardUnit.querySelector ('.card__like-button');
+
+  cardLikeButton.addEventListener('click', function() {
+    likeCallback(cardLikeButton); // Передаем кнопку лайка в колбэк
+  });
+
   return cardUnit;
 }
 
@@ -172,5 +176,5 @@ function deleteCard(cardItem) {
 }
 
 initialCards.forEach(function (item) {
-  placesList.append(createCard(item.name, item.link, deleteCard));
+  placesList.append(createCard(item.name, item.link, deleteCard, likeCallback));
 });
