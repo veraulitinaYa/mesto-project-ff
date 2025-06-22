@@ -3,7 +3,7 @@ export function createCard(
   cardImageLink,
   deleteCallback,
   likeCallback,
-  openCard
+  openCardCallback
 ) {
   const cardTemplate = document.querySelector("#card-template").content;
   const cardUnit = cardTemplate.querySelector(".card").cloneNode(true);
@@ -20,8 +20,8 @@ export function createCard(
       deleteCallback(cardUnit);
     });
 
-  cardUnit.querySelector(".card__image").addEventListener("click", function () {
-    openCard(cardName, cardImageLink);
+  cardImage.addEventListener("click", function () {
+    openCardCallback(cardName, cardImageLink);
   });
 
   const cardLikeButton = cardUnit.querySelector(".card__like-button");
@@ -37,15 +37,6 @@ export function deleteCard(cardItem) {
   cardItem.remove();
 }
 
-export function likeCallback(heartButton) {
+export function likeCard(heartButton) {
   heartButton.classList.toggle("card__like-button_is-active");
-}
-
-export function openCardCallback(cardName, cardLink) {
-  const img = document.querySelector(".popup__image");
-  const name = document.querySelector(".popup__caption");
-  img.src = cardLink;
-  name.textContent = cardName;
-  openPopup(windowImage);
-  closePopup(windowImage);
 }
