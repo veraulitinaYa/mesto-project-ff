@@ -1,3 +1,5 @@
+const cardTemplate = document.querySelector("#card-template").content;
+
 export function createCard(
   cardName,
   cardImageLink,
@@ -5,7 +7,6 @@ export function createCard(
   likeCallback,
   openCardCallback
 ) {
-  const cardTemplate = document.querySelector("#card-template").content;
   const cardUnit = cardTemplate.querySelector(".card").cloneNode(true);
   const cardImage = cardUnit.querySelector(".card__image");
   const cardTitle = cardUnit.querySelector(".card__title");

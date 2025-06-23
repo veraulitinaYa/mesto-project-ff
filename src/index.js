@@ -1,13 +1,11 @@
 import { initialCards } from "./scripts/cards.js";
 import "./pages/index.css";
 import {
-  handleProfileFormSubmit,
-  handleCardFormSubmit,
   openPopup,
   closePopup,
   handleCloseByEscape,
   handleOverlayClick,
-  getCloseButton,
+  addCloseButtonListener,
 } from "./scripts/modal.js";
 import { createCard, deleteCard, likeCard } from "./scripts/card.js";
 
@@ -24,7 +22,11 @@ const cardImageLinkInput = document.querySelector(".popup__input_type_url");
 const placesList = document.querySelector(".places__list");
 const cardOriginalImage = document.querySelector(".popup__image");
 const cardOriginalName = document.querySelector(".popup__caption");
-const closeButton = document.querySelector(".popup__close");
+
+const personNameInput = document.querySelector(".popup__input_type_name");
+const personJobInput = document.querySelector(".popup__input_type_description");
+const jobProfileInfo = document.querySelector(".profile__description");
+const nameProfileInfo = document.querySelector(".profile__title");
 
 formProfile.addEventListener("submit", handleProfileFormSubmit);
 
@@ -47,12 +49,13 @@ formCard.addEventListener("submit", function (evt) {
 
 buttonEditPopup.addEventListener("click", function () {
   openPopup(windowEditPopup);
-  //closePopup(windowEditPopup);
+
+  personJobInput.value = jobProfileInfo.textContent;
+  personNameInput.value = nameProfileInfo.textContent;
 });
 
 buttonNewCard.addEventListener("click", function () {
   openPopup(windowNewCard);
-  //closePopup(windowNewCard);
 });
 
 initialCards.forEach(function (item) {
@@ -61,15 +64,29 @@ initialCards.forEach(function (item) {
   );
 });
 
-//document.addEventListener("keydown", handleCloseByEscape);
-
-// windowEditPopup.addEventListener("click", handleOverlayClick);
-
-// windowNewCard.addEventListener("click", handleOverlayClick);
-
 function openCard(cardName, cardLink) {
   cardOriginalImage.src = cardLink;
+  cardOriginalImage.alt = cardName;
   cardOriginalName.textContent = cardName;
   openPopup(windowImage);
-  //  closePopup(windowImage);
+}
+
+function handleProfileFormSubmit(evt) {
+  evt.preventDefault();
+  const jobInputValue = personJobInput.value;
+  const nameInputValue = personNameInput.value;
+  jobProfileInfo.textContent = jobInputValue;
+  nameProfileInfo.textContent = nameInputValue;
+
+  closePopup(windowEditPopup);
+  this.reset();
+}
+
+function handleCardFormSubmit(evt) {
+  evt.preventDefault();
+
+  const nameFromInput = cardNameInput.value;
+  const linkFromInput = cardImageLinkInput.value;
+
+  return { nameFromInput, linkFromInput };
 }
