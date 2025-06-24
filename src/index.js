@@ -28,10 +28,14 @@ const personJobInput = document.querySelector(".popup__input_type_description");
 const jobProfileInfo = document.querySelector(".profile__description");
 const nameProfileInfo = document.querySelector(".profile__title");
 
+addCloseButtonListener(windowEditPopup);
+addCloseButtonListener(windowImage);
+addCloseButtonListener(windowNewCard);
+
 formProfile.addEventListener("submit", handleProfileFormSubmit);
 
 formCard.addEventListener("submit", function (evt) {
-  const cardData = handleCardFormSubmit(evt);
+  const cardData = extractCardInputValues(evt);
 
   if (cardData) {
     const newCard = createCard(
@@ -82,7 +86,7 @@ function handleProfileFormSubmit(evt) {
   this.reset();
 }
 
-function handleCardFormSubmit(evt) {
+function extractCardInputValues(evt) {
   evt.preventDefault();
 
   const nameFromInput = cardNameInput.value;

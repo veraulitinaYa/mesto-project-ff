@@ -2,7 +2,6 @@ export function openPopup(popup) {
   popup.classList.add("popup_is-opened");
   document.addEventListener("keydown", handleCloseByEscape);
   popup.addEventListener("click", handleOverlayClick);
-  addCloseButtonListener(popup);
 }
 
 export function addCloseButtonListener(popup) {
