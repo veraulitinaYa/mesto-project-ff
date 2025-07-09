@@ -32,20 +32,23 @@ export function createCard(
     });
 
   cardImage.addEventListener("click", function () {
-    openCardCallback(cardName, cardImageLink);
+    openCardCallback(cardName, likeCount.textContent, cardImageLink);
   });
 
   const cardLikeButton = cardUnit.querySelector(".card__like-button");
 
   cardLikeButton.addEventListener("click", function () {
-    likeCallback(cardLikeButton); // Передаем кнопку лайка в колбэк
+    likeCallback(cardLikeButton, likeCount, cardID); // Передаем кнопку лайка в колбэк
   });
 
   if ((currentUserID !== cardOwnerID) && deleteButton) {
     deleteButton.remove();
   }
 
-
+const isLiked = cardLikes.some(like => like._id === currentUserID);
+  if (isLiked) {
+    likeButton.classList.add('card__like-button_is-active');
+  }
 
   return cardUnit;
 }
@@ -63,6 +66,39 @@ export function deleteCard(cardElement, cardID) {
     })
 }
 
-export function likeCard(heartButton) {
-  heartButton.classList.toggle("card__like-button_is-active");
+export function likeCard(heartButton, likeCountElement, cardID) {
+
+if (!heartButton.classList.contains('card__like-button_is-active')) {
+   fetch(`https://nomoreparties.co/v1/wff-cohort-41/cards/likes/${cardID}`, {
+      method: 'PUT',
+      headers: {
+        authorization: '7a2b94ee-f4e5-44ef-8aa6-61356f31bc2d'
+      }
+    })
+    .then(res => {
+
+    return res.json();
+  })
+     .then(updatedCard  => {
+      heartButton.classList.toggle("card__like-button_is-active");
+      likeCountElement.textContent = updatedCard.likes.length;
+    })
+  }
+  else {
+    fetch(`https://nomoreparties.co/v1/wff-cohort-41/cards/likes/${cardID}`, {
+      method: 'DELETE',
+      headers: {
+        authorization: '7a2b94ee-f4e5-44ef-8aa6-61356f31bc2d'
+      }
+    })
+    .then(res => {
+
+    return res.json();
+  })
+     .then(updatedCard  => {
+      heartButton.classList.toggle("card__like-button_is-active");
+      likeCountElement.textContent = updatedCard.likes.length;
+    })
+  }
+
 }
