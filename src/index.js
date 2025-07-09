@@ -1,4 +1,4 @@
-import { initialCards } from "./scripts/cards.js";
+//import { initialCards } from "./scripts/cards.js";
 import "./pages/index.css";
 import {
   openPopup,
@@ -44,8 +44,28 @@ enableValidation();
 
 
 document.addEventListener('DOMContentLoaded', () => {
-getUserInformationFromServer();
+Promise.all([getUserInformationFromServer(), getCardsFromServer()]);
+
+   // .then(([userData, cards]) => {
+      // Обновляем данные пользователя
+      // nameProfileInfo.textContent = userData.name;
+      // jobProfileInfo.textContent = userData.about;
+      // profileAvatar.style.backgroundImage = `url('${userData.avatar}')`;
+
+      // // Очищаем текущие карточки
+      // placesList.innerHTML = '';
+
+      // Добавляем карточки с сервера
+
+      // initialCards.forEach(function (item) {
+//   placesList.append(
+//     createCard(item.name, item.link, deleteCard, likeCard, openCard)
+//   );
 });
+
+
+
+
 
 function getUserInformationFromServer(){
 fetch('https://nomoreparties.co/v1/wff-cohort-41/users/me', {
@@ -68,6 +88,75 @@ fetch('https://nomoreparties.co/v1/wff-cohort-41/users/me', {
 
 }
 
+function getCardsFromServer() {
+  return fetch('https://nomoreparties.co/v1/wff-cohort-41/cards', {
+    headers: {
+      authorization: '7a2b94ee-f4e5-44ef-8aa6-61356f31bc2d'
+    }
+  })
+
+  .then(response => {
+    return response.json(); // Парсим JSON - возвращает новый промис!
+  })
+  .then(cards => {
+
+    cards.forEach(card => {
+        placesList.append(
+          createCard(
+            card.name,
+            card.link,
+            deleteCard,
+            likeCard,
+            openCard,
+            card._id, //ID карточки
+            card._id, //ID пользователя
+            card.likes // массив лайков
+          ))
+
+
+
+  });
+
+});
+
+
+}
+
+function setUserData (customName, customJob) {
+  fetch('https://nomoreparties.co/v1/wff-cohort-41/users/me', {
+  method: 'PATCH',
+  headers: {
+    authorization: '7a2b94ee-f4e5-44ef-8aa6-61356f31bc2d',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    name: customName,
+    about: customJob,
+  })
+});
+}
+
+
+
+//         cards.forEach(card => {
+//         placesList.append(
+//           createCard(
+//             card.name,
+//             card.link,
+//             deleteCard,
+//             likeCard,
+//             openCard,
+//             card._id, // передаем ID карточки
+//             userData._id, // передаем ID пользователя
+//             card.likes // передаем массив лайков
+//           )
+//         );
+//       });
+//     })
+//     .catch(err => {
+//       console.error('Ошибка при загрузке данных:', err);
+//     });
+// }
 
 
 formProfile.addEventListener("submit", handleProfileFormSubmit);
@@ -81,7 +170,10 @@ formCard.addEventListener("submit", function (evt) {
       cardData.linkFromInput,
       deleteCard,
       likeCard,
-      openCard
+      openCard,
+      cardID,
+      userDataID,
+      cardLikes
     );
     placesList.prepend(newCard);
     closePopup(windowNewCard);
@@ -100,12 +192,6 @@ buttonNewCard.addEventListener("click", function () {
   openPopup(windowNewCard);
 });
 
-initialCards.forEach(function (item) {
-  placesList.append(
-    createCard(item.name, item.link, deleteCard, likeCard, openCard)
-  );
-});
-
 function openCard(cardName, cardLink) {
   cardOriginalImage.src = cardLink;
   cardOriginalImage.alt = cardName;
@@ -117,9 +203,9 @@ function handleProfileFormSubmit(evt) {
   evt.preventDefault();
   const jobInputValue = personJobInput.value;
   const nameInputValue = personNameInput.value;
-  jobProfileInfo.textContent = jobInputValue;
-  nameProfileInfo.textContent = nameInputValue;
-
+  //jobProfileInfo.textContent = jobInputValue;
+  //nameProfileInfo.textContent = nameInputValue;
+setUserData(nameInputValue, jobInputValue);
   closePopup(windowEditPopup);
   this.reset();
 }
