@@ -32,7 +32,7 @@ export function createCard(
     });
 
   cardImage.addEventListener("click", function () {
-    openCardCallback(cardName, likeCount.textContent, cardImageLink);
+    openCardCallback(cardName, cardImageLink);
   });
 
   const cardLikeButton = cardUnit.querySelector(".card__like-button");

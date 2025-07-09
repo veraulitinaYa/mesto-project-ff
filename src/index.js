@@ -14,11 +14,15 @@ import {
 
 const buttonEditPopup = document.querySelector(".profile__edit-button");
 const windowEditPopup = document.querySelector(".popup_type_edit");
-const buttonNewCard = document.querySelector(".profile__add-button");
+const windowNewAvatarPopup = document.querySelector(".popup_type_new-avatar");
 const windowNewCard = document.querySelector(".popup_type_new-card");
 const windowImage = document.querySelector(".popup_type_image");
 const formProfile = document.querySelector(".form__profile");
 const formCard = document.querySelector(".form__card");
+const buttonNewCard = document.querySelector(".profile__add-button");
+const avatarEditButton = document.querySelector(".avatar__edit-button");
+const formAvatar = document.querySelector(".form__avatar");
+
 
 const cardNameInput = document.querySelector(".popup__input_type_card-name");
 const cardImageLinkInput = document.querySelector(".popup__input_type_url");
@@ -28,6 +32,7 @@ const cardOriginalName = document.querySelector(".popup__caption");
 
 const personNameInput = document.querySelector(".popup__input_type_name");
 const personJobInput = document.querySelector(".popup__input_type_description");
+const avatarLinkInput = document.querySelector(".popup__input-avatar");
 const jobProfileInfo = document.querySelector(".profile__description");
 const nameProfileInfo = document.querySelector(".profile__title");
 
@@ -41,6 +46,7 @@ let currentCardID;
 addCloseButtonListener(windowEditPopup);
 addCloseButtonListener(windowImage);
 addCloseButtonListener(windowNewCard);
+addCloseButtonListener(windowNewAvatarPopup);
 
 enableValidation();
 
@@ -206,6 +212,34 @@ const cardData = extractCardInputValues(evt);
   }
 });
 
+formAvatar.addEventListener("submit", function (evt) {
+//const cardData = extractCardInputValues(evt);
+evt.preventDefault();
+fetch('https://nomoreparties.co/v1/wff-cohort-41/users/me/avatar', {
+  method: 'PATCH',
+  headers: {
+    authorization: '7a2b94ee-f4e5-44ef-8aa6-61356f31bc2d',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    avatar: avatarLinkInput.value
+  })
+})
+.then(response => {
+    if (!response.ok) {
+      throw new Error('Ошибка при обновлении аватара');
+    }
+    return response.json();
+  })
+  .then(data => {
+
+    profileAvatar.style.backgroundImage = `url('${data.avatar}')`;
+    closePopup(windowNewAvatarPopup);
+    formAvatar.reset();
+  })
+});
+
+
 buttonEditPopup.addEventListener("click", function () {
   openPopup(windowEditPopup);
 
@@ -215,6 +249,10 @@ buttonEditPopup.addEventListener("click", function () {
 
 buttonNewCard.addEventListener("click", function () {
   openPopup(windowNewCard);
+});
+
+avatarEditButton.addEventListener("click", function () {
+  openPopup(windowNewAvatarPopup);
 });
 
 function openCard(cardName, cardLink) {
