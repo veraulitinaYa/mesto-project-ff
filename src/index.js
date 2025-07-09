@@ -8,9 +8,9 @@ import {
   addCloseButtonListener,
 } from "./scripts/modal.js";
 import { createCard, deleteCard, likeCard } from "./scripts/card.js";
-// import {
-//   enableValidation
-// } from "./scripts/validation.js";
+import {
+   enableValidation
+} from "./scripts/validation.js";
 
 const buttonEditPopup = document.querySelector(".profile__edit-button");
 const windowEditPopup = document.querySelector(".popup_type_edit");
@@ -31,120 +31,44 @@ const personJobInput = document.querySelector(".popup__input_type_description");
 const jobProfileInfo = document.querySelector(".profile__description");
 const nameProfileInfo = document.querySelector(".profile__title");
 
+const profileAvatar = document.querySelector(".profile__image");
+
 //-----------------------------------------------showInputError
-
-const showInputError = (formElement, inputElement, errorMessage) => {
-  const errorElement = formElement.querySelector(`.${inputElement.id}-error`);
-  inputElement.classList.add('popup__input_error');
-  errorElement.textContent = errorMessage;
-  errorElement.classList.add('popup__input_error_text');
-};
-
-//-------------------------------hideInputError
-
-const hideInputError = (formElement, inputElement) => {
-  const errorElement = formElement.querySelector(`.${inputElement.id}-error`);
-  inputElement.classList.remove('popup__input_error');
-  errorElement.classList.remove('popup__input_error_text');
-  errorElement.textContent = '';
-};
-//-----------------------------toggleButton
-
-const toggleButtonState = (inputList, buttonElement) => {
-  // Если есть хотя бы один невалидный инпут
-
-  if (hasInvalidInput(inputList)) {
-    // сделай кнопку неактивной
-        buttonElement.classList.add('popup__button-inactive')
-  } else {
-        // иначе сделай кнопку активной
-    buttonElement.classList.remove('popup__button-inactive');
-  }
-};
-
-
-//------------------------------------------------- check Input Validity
-const checkInputValidity = (formElement, inputElement) => {
-  inputElement.setCustomValidity("");
-
-
-
-  if (inputElement.pattern && (inputElement.type !== 'url')) {
-     const regex = new RegExp(inputElement.pattern);
-    if (!regex.test(inputElement.value)) {
-      inputElement.setCustomValidity(inputElement.dataset.errorMessage);
-    }
- }
-
-
-
-  if (!inputElement.validity.valid) {
-    showInputError(formElement, inputElement, inputElement.validationMessage);
-  } else {
-    hideInputError(formElement, inputElement);
-  }
-}
-//-----------------------------------------------------------
-//---------------------------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------------------
-//--------------------------------------- set event listeners
-const setEventListeners = (formElement) => {
-  const inputList = Array.from(formElement.querySelectorAll('.popup__input'));
-  const buttonElement = formElement.querySelector('.popup__button');
-  toggleButtonState(inputList, buttonElement);
-  inputList.forEach((inputElement) => {
-    inputElement.addEventListener('input', function () {
-      checkInputValidity(formElement, inputElement);
-      toggleButtonState(inputList, buttonElement);
-    });
-  });
-};
-
-//----------------------------------------------------------------- enable validation and create fieldList
-
-function enableValidation () {
-  const formList = Array.from(document.querySelectorAll('.popup__form'));
-  formList.forEach((formElement) => {
-    formElement.addEventListener('submit', function (evt) {
-      evt.preventDefault();
-
-    });
-const fieldsetList = Array.from(formElement.querySelectorAll('.popup__input'));
-
-fieldsetList.forEach((fieldSet) => {
-  setEventListeners(formElement);
-});
-
-  });
-}
-
-
-//-----------------------------------------------------------
-
-enableValidation();
-
-//----------------------------------------------------------------- has invalid input
-
-
-function hasInvalidInput (inputList) {
-  // проходим по этому массиву методом some
-  return inputList.some((inputElement) => {
-        // Если поле не валидно, колбэк вернёт true
-    // Обход массива прекратится и вся функция
-    // hasInvalidInput вернёт true
-
-    return !inputElement.validity.valid;
-  })
-};
-
-//----------------------------------------------------------------------------------------------
 
 
 addCloseButtonListener(windowEditPopup);
 addCloseButtonListener(windowImage);
 addCloseButtonListener(windowNewCard);
+
+enableValidation();
+
+
+document.addEventListener('DOMContentLoaded', () => {
+getUserInformationFromServer();
+});
+
+function getUserInformationFromServer(){
+fetch('https://nomoreparties.co/v1/wff-cohort-41/users/me', {
+    headers: {
+    authorization: '7a2b94ee-f4e5-44ef-8aa6-61356f31bc2d'
+  }
+})
+  .then(response => {
+    // response — сырой ответ, но не данные!
+    //console.log(response.status); // 200
+    //console.log(response.ok); // true
+    return response.json(); // Парсим JSON (возвращает новый промис!)
+  })
+  .then(result => {
+    // data — распарсенный JSON (например, { name: "John" })
+      nameProfileInfo.textContent = result.name;
+      jobProfileInfo.textContent = result.about;
+      profileAvatar.style.backgroundImage = `url('${result.avatar}')`;
+  });
+
+}
+
+
 
 formProfile.addEventListener("submit", handleProfileFormSubmit);
 
