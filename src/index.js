@@ -8,6 +8,9 @@ import {
   addCloseButtonListener,
 } from "./scripts/modal.js";
 import { createCard, deleteCard, likeCard } from "./scripts/card.js";
+// import {
+//   enableValidation
+// } from "./scripts/validation.js";
 
 const buttonEditPopup = document.querySelector(".profile__edit-button");
 const windowEditPopup = document.querySelector(".popup_type_edit");
@@ -49,7 +52,7 @@ const hideInputError = (formElement, inputElement) => {
 
 const toggleButtonState = (inputList, buttonElement) => {
   // Если есть хотя бы один невалидный инпут
-  
+
   if (hasInvalidInput(inputList)) {
     // сделай кнопку неактивной
         buttonElement.classList.add('popup__button-inactive')
@@ -101,7 +104,7 @@ const setEventListeners = (formElement) => {
 
 //----------------------------------------------------------------- enable validation and create fieldList
 
-const enableValidation = () => {
+function enableValidation () {
   const formList = Array.from(document.querySelectorAll('.popup__form'));
   formList.forEach((formElement) => {
     formElement.addEventListener('submit', function (evt) {
@@ -115,7 +118,8 @@ fieldsetList.forEach((fieldSet) => {
 });
 
   });
-};
+}
+
 
 //-----------------------------------------------------------
 
