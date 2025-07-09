@@ -32,7 +32,9 @@ const jobProfileInfo = document.querySelector(".profile__description");
 const nameProfileInfo = document.querySelector(".profile__title");
 
 const profileAvatar = document.querySelector(".profile__image");
-
+const currentCardLikeInformation = document.querySelector(".card__like-information");
+let clientSideUserID;
+let currentCardID;
 //-----------------------------------------------showInputError
 
 
@@ -84,6 +86,7 @@ fetch('https://nomoreparties.co/v1/wff-cohort-41/users/me', {
       nameProfileInfo.textContent = result.name;
       jobProfileInfo.textContent = result.about;
       profileAvatar.style.backgroundImage = `url('${result.avatar}')`;
+      clientSideUserID = result._id;
   });
 
 }
@@ -108,14 +111,18 @@ function getCardsFromServer() {
             deleteCard,
             likeCard,
             openCard,
-            card._id, //ID карточки
-            card._id, //ID пользователя
-            card.likes // массив лайков
+            card.likes,
+            card.owner._id,
+            clientSideUserID,
+            card._id
+
           ))
 
 
 
+
   });
+
 
 });
 
@@ -136,33 +143,49 @@ function setUserData (customName, customJob) {
 });
 }
 
+function postCardToServer (customCardName, customCardLink){
+   return fetch('https://nomoreparties.co/v1/wff-cohort-41/cards', {
+    method: 'POST',
+    headers: {
+      authorization: '7a2b94ee-f4e5-44ef-8aa6-61356f31bc2d',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      name: customCardName,
+      link: customCardLink,
+    })
+  })
+}
 
 
-//         cards.forEach(card => {
-//         placesList.append(
-//           createCard(
-//             card.name,
-//             card.link,
-//             deleteCard,
-//             likeCard,
-//             openCard,
-//             card._id, // передаем ID карточки
-//             userData._id, // передаем ID пользователя
-//             card.likes // передаем массив лайков
-//           )
-//         );
-//       });
-//     })
-//     .catch(err => {
-//       console.error('Ошибка при загрузке данных:', err);
-//     });
+
+// function getCardsLikesFromServer() {
+//   return fetch('https://nomoreparties.co/v1/wff-cohort-41/cards', {
+//     headers: {
+//       authorization: '7a2b94ee-f4e5-44ef-8aa6-61356f31bc2d'
+//     }
+//   })
+
+//   .then(response => {
+//     // response — сырой ответ, но не данные!
+//     //console.log(response.status); // 200
+//     //console.log(response.ok); // true
+//     return response.json(); // Парсим JSON (возвращает новый промис!)
+//   })
+//   .then(result => {
+//     // data — распарсенный JSON (например, { name: "John" })
+//       likesArrayFromServer = result.likes;
+//       currentCardLikeInformation.textContent = result.likes;
+
+//   });
+
+
 // }
-
 
 formProfile.addEventListener("submit", handleProfileFormSubmit);
 
 formCard.addEventListener("submit", function (evt) {
-  const cardData = extractCardInputValues(evt);
+const cardData = extractCardInputValues(evt);
 
   if (cardData) {
     const newCard = createCard(
@@ -171,11 +194,13 @@ formCard.addEventListener("submit", function (evt) {
       deleteCard,
       likeCard,
       openCard,
-      cardID,
-      userDataID,
-      cardLikes
+      0,
+      clientSideUserID,
+      clientSideUserID,
+
     );
     placesList.prepend(newCard);
+    postCardToServer(cardData.nameFromInput, cardData.linkFromInput);
     closePopup(windowNewCard);
     formCard.reset();
   }
