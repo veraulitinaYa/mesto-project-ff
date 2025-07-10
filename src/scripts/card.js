@@ -45,10 +45,19 @@ export function createCard(
     deleteButton.remove();
   }
 
-const isLiked = cardLikes.some(like => like._id === currentUserID);
-  if (isLiked) {
-    likeButton.classList.add('card__like-button_is-active');
-  }
+// const isLiked = cardLikes.some(like => { like._id === currentUserID});
+//   if (isLiked) {
+//     likeButton.classList.add('card__like-button_is-active');
+//   }
+
+const isLiked = Array.isArray(cardLikes) &&
+                cardLikes.some(like => like && like._id === currentUserID);
+
+if (isLiked) {
+  likeButton.classList.add('card__like-button_is-active');
+}
+
+
 
   return cardUnit;
 }
@@ -75,10 +84,13 @@ if (!heartButton.classList.contains('card__like-button_is-active')) {
         authorization: '7a2b94ee-f4e5-44ef-8aa6-61356f31bc2d'
       }
     })
-    .then(res => {
+      .then(response => {
+      if (response.ok) {
+        return response.json();
+      }
+        return Promise.reject(`Ошибка: ${res.status}`);
+    })
 
-    return res.json();
-  })
      .then(updatedCard  => {
       heartButton.classList.toggle("card__like-button_is-active");
       likeCountElement.textContent = updatedCard.likes.length;
@@ -91,10 +103,12 @@ if (!heartButton.classList.contains('card__like-button_is-active')) {
         authorization: '7a2b94ee-f4e5-44ef-8aa6-61356f31bc2d'
       }
     })
-    .then(res => {
-
-    return res.json();
-  })
+      .then(response => {
+      if (response.ok) {
+        return response.json();
+      }
+        return Promise.reject(`Ошибка: ${res.status}`);
+    })
      .then(updatedCard  => {
       heartButton.classList.toggle("card__like-button_is-active");
       likeCountElement.textContent = updatedCard.likes.length;

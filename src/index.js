@@ -11,6 +11,12 @@ import { createCard, deleteCard, likeCard } from "./scripts/card.js";
 import {
    enableValidation
 } from "./scripts/validation.js";
+import {
+  getUserInformationFromServer,
+  getCardsFromServer,
+  setUserData,
+  postCardToServer
+} from "./scripts/api.js";
 
 const buttonEditPopup = document.querySelector(".profile__edit-button");
 const windowEditPopup = document.querySelector(".popup_type_edit");
@@ -52,146 +58,25 @@ enableValidation();
 
 
 document.addEventListener('DOMContentLoaded', () => {
-Promise.all([getUserInformationFromServer(), getCardsFromServer()]);
-
-   // .then(([userData, cards]) => {
-      // Обновляем данные пользователя
-      // nameProfileInfo.textContent = userData.name;
-      // jobProfileInfo.textContent = userData.about;
-      // profileAvatar.style.backgroundImage = `url('${userData.avatar}')`;
-
-      // // Очищаем текущие карточки
-      // placesList.innerHTML = '';
-
-      // Добавляем карточки с сервера
-
-      // initialCards.forEach(function (item) {
-//   placesList.append(
-//     createCard(item.name, item.link, deleteCard, likeCard, openCard)
-//   );
-});
-
-
-
-
-
-function getUserInformationFromServer(){
-fetch('https://nomoreparties.co/v1/wff-cohort-41/users/me', {
-    headers: {
-    authorization: '7a2b94ee-f4e5-44ef-8aa6-61356f31bc2d'
-  }
-})
-  .then(response => {
-    // response — сырой ответ, но не данные!
-    //console.log(response.status); // 200
-    //console.log(response.ok); // true
-    return response.json(); // Парсим JSON (возвращает новый промис!)
-  })
-  .then(result => {
-    // data — распарсенный JSON (например, { name: "John" })
-      nameProfileInfo.textContent = result.name;
-      jobProfileInfo.textContent = result.about;
-      profileAvatar.style.backgroundImage = `url('${result.avatar}')`;
-      clientSideUserID = result._id;
-  });
-
-}
-
-function getCardsFromServer() {
-  return fetch('https://nomoreparties.co/v1/wff-cohort-41/cards', {
-    headers: {
-      authorization: '7a2b94ee-f4e5-44ef-8aa6-61356f31bc2d'
-    }
-  })
-
-  .then(response => {
-    return response.json(); // Парсим JSON - возвращает новый промис!
-  })
-  .then(cards => {
-
-    cards.forEach(card => {
-        placesList.append(
-          createCard(
-            card.name,
-            card.link,
-            deleteCard,
-            likeCard,
-            openCard,
-            card.likes,
-            card.owner._id,
-            clientSideUserID,
-            card._id
-
-          ))
-
-
-
-
-  });
+Promise.all([getUserInformationFromServer(nameProfileInfo, jobProfileInfo,profileAvatar, clientSideUserID), getCardsFromServer(placesList, openCard, clientSideUserID)]);
 
 
 });
-
-
-}
-
-function setUserData (customName, customJob) {
-  fetch('https://nomoreparties.co/v1/wff-cohort-41/users/me', {
-  method: 'PATCH',
-  headers: {
-    authorization: '7a2b94ee-f4e5-44ef-8aa6-61356f31bc2d',
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    name: customName,
-    about: customJob,
-  })
-});
-}
-
-function postCardToServer (customCardName, customCardLink){
-   return fetch('https://nomoreparties.co/v1/wff-cohort-41/cards', {
-    method: 'POST',
-    headers: {
-      authorization: '7a2b94ee-f4e5-44ef-8aa6-61356f31bc2d',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      name: customCardName,
-      link: customCardLink,
-    })
-  })
-}
-
-
-
-// function getCardsLikesFromServer() {
-//   return fetch('https://nomoreparties.co/v1/wff-cohort-41/cards', {
-//     headers: {
-//       authorization: '7a2b94ee-f4e5-44ef-8aa6-61356f31bc2d'
-//     }
-//   })
-
-//   .then(response => {
-//     // response — сырой ответ, но не данные!
-//     //console.log(response.status); // 200
-//     //console.log(response.ok); // true
-//     return response.json(); // Парсим JSON (возвращает новый промис!)
-//   })
-//   .then(result => {
-//     // data — распарсенный JSON (например, { name: "John" })
-//       likesArrayFromServer = result.likes;
-//       currentCardLikeInformation.textContent = result.likes;
-
-//   });
-
-
-// }
 
 formProfile.addEventListener("submit", handleProfileFormSubmit);
 
 formCard.addEventListener("submit", function (evt) {
-const cardData = extractCardInputValues(evt);
+  const submitButton = formAvatar.querySelector('.popup__button');
+  const originalText = submitButton.textContent;
+
+  submitButton.textContent = 'Сохранение...';
+
+  submitButton.disabled = true;
+  const cardData = extractCardInputValues(evt);
+
+
+
+
 
   if (cardData) {
     const newCard = createCard(
@@ -207,14 +92,23 @@ const cardData = extractCardInputValues(evt);
     );
     placesList.prepend(newCard);
     postCardToServer(cardData.nameFromInput, cardData.linkFromInput);
+    submitButton.textContent = originalText;
+    submitButton.disabled = false;
     closePopup(windowNewCard);
     formCard.reset();
+
   }
 });
 
 formAvatar.addEventListener("submit", function (evt) {
 //const cardData = extractCardInputValues(evt);
 evt.preventDefault();
+  const submitButton = formAvatar.querySelector('.popup__button');
+  const originalText = submitButton.textContent;
+
+  submitButton.textContent = 'Сохранение...';
+
+  submitButton.disabled = true;
 fetch('https://nomoreparties.co/v1/wff-cohort-41/users/me/avatar', {
   method: 'PATCH',
   headers: {
@@ -237,6 +131,13 @@ fetch('https://nomoreparties.co/v1/wff-cohort-41/users/me/avatar', {
     closePopup(windowNewAvatarPopup);
     formAvatar.reset();
   })
+   .catch(err => {
+    console.error('Ошибка:', err);
+  })
+  .finally(() => {
+    submitButton.textContent = originalText;
+    submitButton.disabled = false;
+  });
 });
 
 
@@ -264,11 +165,19 @@ function openCard(cardName, cardLink) {
 
 function handleProfileFormSubmit(evt) {
   evt.preventDefault();
+  const submitButton = formAvatar.querySelector('.popup__button');
+  const originalText = submitButton.textContent;
+
+  submitButton.textContent = 'Сохранение...';
+
+  submitButton.disabled = true;
   const jobInputValue = personJobInput.value;
   const nameInputValue = personNameInput.value;
-  //jobProfileInfo.textContent = jobInputValue;
-  //nameProfileInfo.textContent = nameInputValue;
+
 setUserData(nameInputValue, jobInputValue);
+submitButton.textContent = originalText;
+    submitButton.disabled = false;
+
   closePopup(windowEditPopup);
   this.reset();
 }
