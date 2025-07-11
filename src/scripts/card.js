@@ -1,3 +1,7 @@
+import {
+deleteCardFromServer
+} from "./api.js";
+
 const cardTemplate = document.querySelector("#card-template").content;
 
 export function createCard(
@@ -63,56 +67,28 @@ if (isLiked) {
 }
 
 export function deleteCard(cardElement, cardID) {
-  //cardItem.remove();
-   fetch(`https://nomoreparties.co/v1/wff-cohort-41/cards/${cardID}`, {
-      method: 'DELETE',
-      headers: {
-        authorization: '7a2b94ee-f4e5-44ef-8aa6-61356f31bc2d'
-      }
-    })
-     .then(() => {
+
+   deleteCardFromServer(cardID)
+    .then(() => {
       cardElement.remove();
     })
+    .catch(err => {
+      console.error('Ошибка при удалении карточки:', err);
+    });
 }
 
 export function likeCard(heartButton, likeCountElement, cardID) {
+  const isLiked = heartButton.classList.contains('card__like-button_is-active');
+  const likeAction = isLiked ? removeLikeFromCard(cardID) : addLikeToCard(cardID);
 
-if (!heartButton.classList.contains('card__like-button_is-active')) {
-   fetch(`https://nomoreparties.co/v1/wff-cohort-41/cards/likes/${cardID}`, {
-      method: 'PUT',
-      headers: {
-        authorization: '7a2b94ee-f4e5-44ef-8aa6-61356f31bc2d'
-      }
-    })
-      .then(response => {
-      if (response.ok) {
-        return response.json();
-      }
-        return Promise.reject(`Ошибка: ${res.status}`);
-    })
-
-     .then(updatedCard  => {
+  likeAction
+    .then(updatedCard => {
       heartButton.classList.toggle("card__like-button_is-active");
       likeCountElement.textContent = updatedCard.likes.length;
     })
-  }
-  else {
-    fetch(`https://nomoreparties.co/v1/wff-cohort-41/cards/likes/${cardID}`, {
-      method: 'DELETE',
-      headers: {
-        authorization: '7a2b94ee-f4e5-44ef-8aa6-61356f31bc2d'
-      }
-    })
-      .then(response => {
-      if (response.ok) {
-        return response.json();
-      }
-        return Promise.reject(`Ошибка: ${res.status}`);
-    })
-     .then(updatedCard  => {
-      heartButton.classList.toggle("card__like-button_is-active");
-      likeCountElement.textContent = updatedCard.likes.length;
-    })
-  }
-
+    .catch(err => {
+      console.error('Ошибка при обновлении лайка:', err);
+    });
 }
+
+

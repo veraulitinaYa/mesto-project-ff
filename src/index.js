@@ -14,6 +14,7 @@ import {
 import {
   getUserInformationFromServer,
   getCardsFromServer,
+  setUserAvatarOnServer,
   setUserData,
   postCardToServer
 } from "./scripts/api.js";
@@ -57,10 +58,44 @@ addCloseButtonListener(windowNewAvatarPopup);
 enableValidation();
 
 
+// document.addEventListener('DOMContentLoaded', () => {
+// Promise.all([getUserInformationFromServer(nameProfileInfo, jobProfileInfo,profileAvatar, clientSideUserID), getCardsFromServer(placesList, openCard, clientSideUserID)]);
+
+
+// });
+
 document.addEventListener('DOMContentLoaded', () => {
-Promise.all([getUserInformationFromServer(nameProfileInfo, jobProfileInfo,profileAvatar, clientSideUserID), getCardsFromServer(placesList, openCard, clientSideUserID)]);
+Promise.all([
+    getUserInformationFromServer(),  // ← Получаем данные пользователя
+    getCardsFromServer()
+  ])
+    .then(([userData, cards]) => {  // Деструктуризация ответа
+      // Обновляем профиль
+      nameProfileInfo.textContent = userData.name;
+      jobProfileInfo.textContent = userData.about;
+      profileAvatar.style.backgroundImage = `url('${userData.avatar}')`;
 
+      // Сохраняем ID пользователя
+      clientSideUserID = userData._id;
 
+      // Обработка карточек (остаётся как было)
+      cards.forEach(card => {
+        placesList.append(
+          createCard(
+            card.name,
+            card.link,
+            deleteCard,
+            likeCard,
+            openCard,
+            card.likes,
+            card.owner._id,
+            clientSideUserID,
+            card._id
+          )
+        );
+      });
+    })
+    .catch(err => console.error('Ошибка загрузки данных:', err));
 });
 
 formProfile.addEventListener("submit", handleProfileFormSubmit);
@@ -109,37 +144,21 @@ evt.preventDefault();
   submitButton.textContent = 'Сохранение...';
 
   submitButton.disabled = true;
-fetch('https://nomoreparties.co/v1/wff-cohort-41/users/me/avatar', {
-  method: 'PATCH',
-  headers: {
-    authorization: '7a2b94ee-f4e5-44ef-8aa6-61356f31bc2d',
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    avatar: avatarLinkInput.value
-  })
-})
-.then(response => {
-    if (!response.ok) {
-      throw new Error('Ошибка при обновлении аватара');
-    }
-    return response.json();
-  })
-  .then(data => {
 
-    profileAvatar.style.backgroundImage = `url('${data.avatar}')`;
-    closePopup(windowNewAvatarPopup);
-    formAvatar.reset();
-  })
-   .catch(err => {
-    console.error('Ошибка:', err);
-  })
-  .finally(() => {
-    submitButton.textContent = originalText;
-    submitButton.disabled = false;
-  });
+   setUserAvatarOnServer(avatarLinkInput)  // ← Используем новую функцию из api.js
+    .then(data => {
+      profileAvatar.style.backgroundImage = `url('${data.avatar}')`;
+      closePopup(windowNewAvatarPopup);
+      formAvatar.reset();
+    })
+    .catch(err => {
+      console.error('Ошибка:', err);
+    })
+    .finally(() => {
+      submitButton.textContent = originalText;
+      submitButton.disabled = false;
+    });
 });
-
 
 buttonEditPopup.addEventListener("click", function () {
   openPopup(windowEditPopup);
