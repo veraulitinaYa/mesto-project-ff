@@ -1,4 +1,3 @@
-//import { initialCards } from "./scripts/cards.js";
 import "./pages/index.css";
 import {
   openPopup,
@@ -9,14 +8,16 @@ import {
 } from "./scripts/modal.js";
 import { createCard, deleteCard, likeCard } from "./scripts/card.js";
 import {
-   enableValidation
+  enableValidation,
+  clearValidation,
+  validationConfig,
 } from "./scripts/validation.js";
 import {
   getUserInformationFromServer,
   getCardsFromServer,
   setUserAvatarOnServer,
   setUserData,
-  postCardToServer
+  postCardToServer,
 } from "./scripts/api.js";
 
 const buttonEditPopup = document.querySelector(".profile__edit-button");
@@ -29,7 +30,6 @@ const formCard = document.querySelector(".form__card");
 const buttonNewCard = document.querySelector(".profile__add-button");
 const avatarEditButton = document.querySelector(".avatar__edit-button");
 const formAvatar = document.querySelector(".form__avatar");
-
 
 const cardNameInput = document.querySelector(".popup__input_type_card-name");
 const cardImageLinkInput = document.querySelector(".popup__input_type_url");
@@ -44,42 +44,29 @@ const jobProfileInfo = document.querySelector(".profile__description");
 const nameProfileInfo = document.querySelector(".profile__title");
 
 const profileAvatar = document.querySelector(".profile__image");
-const currentCardLikeInformation = document.querySelector(".card__like-information");
+const currentCardLikeInformation = document.querySelector(
+  ".card__like-information"
+);
 let clientSideUserID;
 let currentCardID;
-//-----------------------------------------------showInputError
-
 
 addCloseButtonListener(windowEditPopup);
 addCloseButtonListener(windowImage);
 addCloseButtonListener(windowNewCard);
 addCloseButtonListener(windowNewAvatarPopup);
 
-enableValidation();
+enableValidation(validationConfig);
 
-
-// document.addEventListener('DOMContentLoaded', () => {
-// Promise.all([getUserInformationFromServer(nameProfileInfo, jobProfileInfo,profileAvatar, clientSideUserID), getCardsFromServer(placesList, openCard, clientSideUserID)]);
-
-
-// });
-
-document.addEventListener('DOMContentLoaded', () => {
-Promise.all([
-    getUserInformationFromServer(),  // ← Получаем данные пользователя
-    getCardsFromServer()
-  ])
-    .then(([userData, cards]) => {  // Деструктуризация ответа
-      // Обновляем профиль
+document.addEventListener("DOMContentLoaded", () => {
+  Promise.all([getUserInformationFromServer(), getCardsFromServer()])
+    .then(([userData, cards]) => {
       nameProfileInfo.textContent = userData.name;
       jobProfileInfo.textContent = userData.about;
       profileAvatar.style.backgroundImage = `url('${userData.avatar}')`;
 
-      // Сохраняем ID пользователя
       clientSideUserID = userData._id;
 
-      // Обработка карточек (остаётся как было)
-      cards.forEach(card => {
+      cards.forEach((card) => {
         placesList.append(
           createCard(
             card.name,
@@ -95,23 +82,19 @@ Promise.all([
         );
       });
     })
-    .catch(err => console.error('Ошибка загрузки данных:', err));
+    .catch((err) => console.error("Ошибка загрузки данных:", err));
 });
 
 formProfile.addEventListener("submit", handleProfileFormSubmit);
 
 formCard.addEventListener("submit", function (evt) {
-  const submitButton = formAvatar.querySelector('.popup__button');
+  const submitButton = formCard.querySelector(".popup__button");
   const originalText = submitButton.textContent;
 
-  submitButton.textContent = 'Сохранение...';
+  submitButton.textContent = "Сохранение...";
 
   submitButton.disabled = true;
   const cardData = extractCardInputValues(evt);
-
-
-
-
 
   if (cardData) {
     const newCard = createCard(
@@ -122,37 +105,35 @@ formCard.addEventListener("submit", function (evt) {
       openCard,
       0,
       clientSideUserID,
-      clientSideUserID,
-
+      clientSideUserID
     );
     placesList.prepend(newCard);
     postCardToServer(cardData.nameFromInput, cardData.linkFromInput);
     submitButton.textContent = originalText;
     submitButton.disabled = false;
-    closePopup(windowNewCard);
-    formCard.reset();
-
   }
+
+  formCard.reset();
+  closePopup(windowNewCard);
 });
 
 formAvatar.addEventListener("submit", function (evt) {
-//const cardData = extractCardInputValues(evt);
-evt.preventDefault();
-  const submitButton = formAvatar.querySelector('.popup__button');
+  evt.preventDefault();
+  const submitButton = formAvatar.querySelector(".popup__button");
   const originalText = submitButton.textContent;
 
-  submitButton.textContent = 'Сохранение...';
+  submitButton.textContent = "Сохранение...";
 
   submitButton.disabled = true;
 
-   setUserAvatarOnServer(avatarLinkInput)  // ← Используем новую функцию из api.js
-    .then(data => {
+  setUserAvatarOnServer(avatarLinkInput)
+    .then((data) => {
       profileAvatar.style.backgroundImage = `url('${data.avatar}')`;
       closePopup(windowNewAvatarPopup);
       formAvatar.reset();
     })
-    .catch(err => {
-      console.error('Ошибка:', err);
+    .catch((err) => {
+      console.error("Ошибка:", err);
     })
     .finally(() => {
       submitButton.textContent = originalText;
@@ -162,6 +143,7 @@ evt.preventDefault();
 
 buttonEditPopup.addEventListener("click", function () {
   openPopup(windowEditPopup);
+  clearValidation(windowEditPopup, validationConfig);
 
   personJobInput.value = jobProfileInfo.textContent;
   personNameInput.value = nameProfileInfo.textContent;
@@ -169,10 +151,12 @@ buttonEditPopup.addEventListener("click", function () {
 
 buttonNewCard.addEventListener("click", function () {
   openPopup(windowNewCard);
+  clearValidation(windowNewCard, validationConfig);
 });
 
 avatarEditButton.addEventListener("click", function () {
   openPopup(windowNewAvatarPopup);
+  clearValidation(windowNewAvatarPopup, validationConfig);
 });
 
 function openCard(cardName, cardLink) {
@@ -184,18 +168,18 @@ function openCard(cardName, cardLink) {
 
 function handleProfileFormSubmit(evt) {
   evt.preventDefault();
-  const submitButton = formAvatar.querySelector('.popup__button');
+  const submitButton = formAvatar.querySelector(".popup__button");
   const originalText = submitButton.textContent;
 
-  submitButton.textContent = 'Сохранение...';
+  submitButton.textContent = "Сохранение...";
 
   submitButton.disabled = true;
   const jobInputValue = personJobInput.value;
   const nameInputValue = personNameInput.value;
 
-setUserData(nameInputValue, jobInputValue);
-submitButton.textContent = originalText;
-    submitButton.disabled = false;
+  setUserData(nameInputValue, jobInputValue);
+  submitButton.textContent = originalText;
+  submitButton.disabled = false;
 
   closePopup(windowEditPopup);
   this.reset();
