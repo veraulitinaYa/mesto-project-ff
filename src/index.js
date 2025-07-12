@@ -143,7 +143,7 @@ formAvatar.addEventListener("submit", function (evt) {
 
 buttonEditPopup.addEventListener("click", function () {
   openPopup(windowEditPopup);
-  clearValidation(windowEditPopup, validationConfig);
+  clearValidation(validationConfig, windowEditPopup);
 
   personJobInput.value = jobProfileInfo.textContent;
   personNameInput.value = nameProfileInfo.textContent;
@@ -151,12 +151,12 @@ buttonEditPopup.addEventListener("click", function () {
 
 buttonNewCard.addEventListener("click", function () {
   openPopup(windowNewCard);
-  clearValidation(windowNewCard, validationConfig);
+  clearValidation(validationConfig, windowNewCard);
 });
 
 avatarEditButton.addEventListener("click", function () {
   openPopup(windowNewAvatarPopup);
-  clearValidation(windowNewAvatarPopup, validationConfig);
+  clearValidation(validationConfig, windowNewAvatarPopup);
 });
 
 function openCard(cardName, cardLink) {
@@ -177,9 +177,23 @@ function handleProfileFormSubmit(evt) {
   const jobInputValue = personJobInput.value;
   const nameInputValue = personNameInput.value;
 
-  setUserData(nameInputValue, jobInputValue);
-  submitButton.textContent = originalText;
-  submitButton.disabled = false;
+  setUserData(nameInputValue, jobInputValue)
+    .then((data) => {
+      // Обновляем DOM только после успешного ответа от сервера
+      nameProfileInfo.textContent = data.name;
+      jobProfileInfo.textContent = data.about;
+      closePopup(windowEditPopup);
+    })
+    .catch((err) => {
+      console.error("Ошибка при обновлении данных:", err);
+    })
+    .finally(() => {
+      submitButton.textContent = originalText;
+      submitButton.disabled = false;
+    });
+
+  // submitButton.textContent = originalText;
+  // submitButton.disabled = false;
 
   closePopup(windowEditPopup);
   this.reset();
