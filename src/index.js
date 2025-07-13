@@ -97,24 +97,32 @@ formCard.addEventListener("submit", function (evt) {
   const cardData = extractCardInputValues(evt);
 
   if (cardData) {
-    const newCard = createCard(
-      cardData.nameFromInput,
-      cardData.linkFromInput,
-      deleteCard,
-      likeCard,
-      openCard,
-      0,
-      clientSideUserID,
-      clientSideUserID
-    );
-    placesList.prepend(newCard);
-    postCardToServer(cardData.nameFromInput, cardData.linkFromInput);
-    submitButton.textContent = originalText;
-    submitButton.disabled = false;
+    postCardToServer(cardData.nameFromInput, cardData.linkFromInput)
+      .then((newCard) => {
+        const newCardElement = createCard(
+          newCard.name,
+          newCard.link,
+          deleteCard,
+          likeCard,
+          openCard,
+          newCard.likes,
+          newCard.owner._id,
+          clientSideUserID,
+          newCard._id
+        );
+        placesList.prepend(newCardElement);
+        formCard.reset();
+        clearValidation(validationConfig, windowNewCard);
+        closePopup(windowNewCard);
+      })
+      .catch((err) => {
+        console.error("Ошибка при создании карточки:", err);
+      })
+      .finally(() => {
+        submitButton.textContent = originalText;
+        submitButton.disabled = false;
+      });
   }
-
-  formCard.reset();
-  closePopup(windowNewCard);
 });
 
 formAvatar.addEventListener("submit", function (evt) {
@@ -151,7 +159,6 @@ buttonEditPopup.addEventListener("click", function () {
 
 buttonNewCard.addEventListener("click", function () {
   openPopup(windowNewCard);
-  clearValidation(validationConfig, windowNewCard);
 });
 
 avatarEditButton.addEventListener("click", function () {
@@ -168,7 +175,7 @@ function openCard(cardName, cardLink) {
 
 function handleProfileFormSubmit(evt) {
   evt.preventDefault();
-  const submitButton = formAvatar.querySelector(".popup__button");
+  const submitButton = formProfile.querySelector(".popup__button");
   const originalText = submitButton.textContent;
 
   submitButton.textContent = "Сохранение...";
@@ -179,7 +186,6 @@ function handleProfileFormSubmit(evt) {
 
   setUserData(nameInputValue, jobInputValue)
     .then((data) => {
-      // Обновляем DOM только после успешного ответа от сервера
       nameProfileInfo.textContent = data.name;
       jobProfileInfo.textContent = data.about;
       closePopup(windowEditPopup);
@@ -192,11 +198,6 @@ function handleProfileFormSubmit(evt) {
       submitButton.disabled = false;
     });
 
-  // submitButton.textContent = originalText;
-  // submitButton.disabled = false;
-
-  closePopup(windowEditPopup);
-  this.reset();
 }
 
 function extractCardInputValues(evt) {
